@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 
-from .models import User, Balance
-from .forms import AmountForm
+from .models import Balance
+from django.contrib.auth.models import User
+from .forms import AmountForm, NewUserForm
 
 def index(request):
     template = loader.get_template('atm_app/index.html')
@@ -59,6 +60,41 @@ def deposit(request):
             return HttpResponseRedirect('/atm/')
     else:
         form = AmountForm()
+
+    context = {
+        'form': form,
+    }
+    
+    return HttpResponse(template.render(context, request))
+
+def register(request):
+    template = loader.get_template('register/register.html')
+    if request.method == 'POST':
+        form = NewUserForm(request.POST)
+        if form.is_valid():
+            newuser_username = form.cleaned_data['username']
+            newuser_email = form.cleaned_data['email']
+            newuser_pass = form.cleaned_data['password1']
+            if(newuser_pass != form.cleaned_data['password2']):
+                return HttpResponseRedirect('/atm/register')
+
+            newuser = User.objects.create_user(newuser_username, newuser_email, newuser_pass)
+            newuser.save()
+
+            return HttpResponseRedirect('/')
+
+            # MANIPULATING DATABASE, 2PL HERE MAYBE
+            try:
+                user_balance = Balance.objects.get(user=request.user, balance_currency=withdraw_currency)
+            except Balance.DoesNotExist:
+                return HttpResponseRedirect('/atm/')
+            
+            user_balance.balance_amount -= withdraw_amount
+            user_balance.save()
+            
+            return HttpResponseRedirect('/atm/')
+    else:
+        form = NewUserForm()
 
     context = {
         'form': form,

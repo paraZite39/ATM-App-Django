@@ -6,4 +6,5 @@ urlpatterns = [
     path('query', views.query, name='query'),
     path('deposit', views.deposit, name='deposit'),
     path('withdraw', views.withdraw, name='withdraw'),
+    path('register', views.register, name='register'),
 ]
