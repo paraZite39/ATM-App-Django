@@ -1,0 +1,14 @@
+{% extends 'template_base.html' %}
+{% block content %}
+	<h1 class="section-title">Account balances for {{ username }}:</h1>
+	{% if balance_list %}
+		<ul>
+			{% for balance in balance_list %}
+				<li class="balance-item">{{ balance.balance_currency }} balance: {{ balance.balance_amount }} {{ balance.balance_currency }} </li>
+			{% endfor %}
+		</ul>
+	{% else %}
+		<p>No balances available.</p>
+	{% endif %}
+{% endblock %}
+		

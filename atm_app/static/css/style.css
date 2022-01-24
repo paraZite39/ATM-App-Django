@@ -1,0 +1,35 @@
+body {
+	display: flex;
+	background-color: #F8F0FB;
+}
+
+#main-content {
+	margin-top: 100px;
+}
+
+.balance-item {
+	font-size: 18px;
+	margin-bottom: 10px;
+	color: #211A1D;
+}
+
+.section-title {
+	color: #6320EE;
+	margin-bottom: 20px;
+}
+
+.sidebar-nav {
+	list-style: none;
+	position: absolute;
+	left: 0px;
+	background-color: #211A1D;
+	height: 100vh;
+	width: 200px;
+	padding-top: 100px;
+}
+
+.sidebar-nav > li > a {
+	color: #F8F0FB;
+	font-size: 25px;
+	margin-bottom: 30px;
+}
