@@ -12,7 +12,11 @@ import datetime
 def index(request):
     if request.user.is_authenticated:
         template = loader.get_template('atm_app/index.html')
-        latest_transactions = Transaction.objects.filter(user=request.user).order_by('timestamp')[:15]
+        try:
+            latest_transactions = Transaction.objects.filter(user=request.user).order_by('-timestamp')[:15]
+        except Transaction.DoesNotExist:
+            latest_transactions = None
+            
         context = {'latest_transactions_list' : latest_transactions}
         return HttpResponse(template.render(context, request))
     else:
