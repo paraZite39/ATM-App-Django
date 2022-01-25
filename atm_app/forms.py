@@ -17,6 +17,11 @@ class NewUserForm(UserCreationForm):
                 fields = ("username", "email", "password1", "password2")
 
 class ExchangeForm(forms.Form):
-        from_currency = forms.ChoiceField(label="From Currency", choices=currency_choices, widget=forms.RadioSelect)
+        from_currency = forms.ChoiceField(label="From Currency", choices=currency_choices, widget=forms.Select)
         amount = forms.IntegerField(label="Amount")
-        to_currency = forms.ChoiceField(label="To Currency", choices=currency_choices, widget=forms.RadioSelect)
+        to_currency = forms.ChoiceField(label="To Currency", choices=currency_choices, widget=forms.Select)
+
+class TransferForm(forms.Form):
+        recipient_user = forms.CharField(label="Recipient User")
+        amount = forms.IntegerField(label="Amount")
+        currency = forms.ChoiceField(label="Currency", choices=currency_choices, widget=forms.Select)

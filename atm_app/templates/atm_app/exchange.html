@@ -1,12 +1,12 @@
 ﻿{% extends 'template_base.html' %}
 
 {% block content %}
-    <h1 class="section-title">Enter here the amount you want to deposit.</h1>
+    <h1 class="section-title">Enter here the amount and currencies you wish to exchange.</h1>
     <div class="form-group">
-    <form action="/atm/deposit" method="post">
+    <form action="/atm/exchange" method="post">
         {% csrf_token %}
         {{ form }}
-        <input class="btn btn-primary" type="submit" value="Deposit"/>
+        <input class="btn btn-primary" type="submit" value="Exchange"/>
     </form>
     </div>
 {% endblock %}

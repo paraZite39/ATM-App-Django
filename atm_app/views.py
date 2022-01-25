@@ -6,6 +6,10 @@ from .models import Balance
 from django.contrib.auth.models import User
 from .forms import AmountForm, NewUserForm
 
+currency_rates = {
+    
+}
+
 def index(request):
     template = loader.get_template('atm_app/index.html')
     context = None
@@ -130,7 +134,136 @@ def withdraw(request):
         return HttpResponseRedirect('/accounts/login')
 
 def exchange(request):
-    return HttpResponseRedirect('/atm/')
+    currency_exchange_rates = {
+        "USD": {
+            "EUR": 0.89,
+            "RON": 4.38,
+            "GBP": 0.74
+        },
+        "EUR": {
+            "USD": 1.13,
+            "RON": 4.94,
+            "GBP": 0.84
+        },
+        "RON": {
+            "USD": 0.23,
+            "EUR": 0.2,
+            "GBP": 0.17
+        },
+        "GBP": {
+            "USD": 1.35,
+            "EUR": 1.2,
+            "RON": 5.92
+        }
+    }
+    
+    if request.user.is_authenticated:
+        template = loader.get_template('atm_app/exchange.html')
+        if request.method == 'POST':
+            form = ExchangeForm(request.POST)
+            if form.is_valid():
+                from_currency = form.cleaned_data['from_currency']
+                exchange_amount = form.cleaned_data['amount']
+                to_currency = form.cleaned_data['to_currency']
+
+                if from_currency == to_currency:
+                    return HttpResponseRedirect('/atm/')
+
+                try:
+                    from_balance = Balance.objects.get(user=request.user, balance_currency=from_currency)
+                except Balance.DoesNotExist:
+                    return HttpResponseRedirect('/atm/')
+
+                try:
+                    to_balance = Balance.objects.get(user=request.user, balance_currency=to_currency)
+                except Balance.DoesNotExist:
+                    to_balance = Balance(user=request.user, balance_currency=to_currency, balance_amount=0)
+
+                if(exchange_amount > from_balance.balance_amount):
+                    return HttpResponseRedirect('/atm/')
+
+                final_amount = currency_exchange_rates[from_currency][to_currency]
+                
+                from_balance.balance_amount -= exchange_amount
+                to_balance.balance_amount += final_amount
+                from_balance.save()
+                to_balance.save()
+                
+                return HttpResponseRedirect('/atm/')
+        else:
+            form = ExchangeForm()
+
+        context = {
+            'form': form,
+        }
+        
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponseRedirect('/accounts/login')
 
 def transfer(request):
-    return HttpResponseRedirect('/atm/')
+    if request.user.is_authenticated:
+        template = loader.get_template('atm_app/transfer.html')
+        if request.method == 'POST':
+            form = TransferForm(request.POST)
+            if form.is_valid():
+                currency = form.cleaned_data['currency']
+                transfer_amount = form.cleaned_data['amount']
+                to_username = form.cleaned_data['recipient_user']
+
+
+                if request.user.username == to_username or transfer_amount <= 0:
+                    # cannot transfer to sending account or an amount of maximum 0
+                    return HttpResponseRedirect('/atm/')
+
+                try:
+                    from_balance = Balance.objects.get(user=request.user, balance_currency=currency)
+                except Balance.DoesNotExist:
+                    # sending account does not exist
+                    return HttpResponseRedirect('/atm/')
+
+                if transfer_amount > from_balance.balance_amount:
+                    # not enough money in sending account
+                    return HttpResponseRedirect('/atm/')
+
+                try:
+                    to_user = User.objects.get(username=to_username)
+                except User.DoesNotExist:
+                    # recipient user not found
+                    return HttpResponseRedirect('/atm/')
+                
+                try:
+                    to_balance = Balance.objects.get(user=to_user, balance_currency=currency)
+                except Balance.DoesNotExist:
+                    # recipient user doesn't have an account in the chosen currency
+                    to_balance = Balance(user=to_user, balance_currency=currency, amount=0)
+
+                from_balance.balance_amount -= transfer_amountt
+                to_balance.balance_amount += transfer_amount
+
+                try:
+                    to_balance = Balance.objects.get(user=request.user, balance_currency=to_currency)
+                except Balance.DoesNotExist:
+                    to_balance = Balance(user=request.user, balance_currency=to_currency, balance_amount=0)
+
+                if(exchange_amount > from_balance.balance_amount):
+                    return HttpResponseRedirect('/atm/')
+
+                final_amount = currency_exchange_rates[from_currency][to_currency]
+                
+                from_balance.balance_amount -= exchange_amount
+                to_balance.balance_amount += final_amount
+                from_balance.save()
+                to_balance.save()
+                
+                return HttpResponseRedirect('/atm/')
+        else:
+            form = TransferForm()
+
+        context = {
+            'form': form,
+        }
+        
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponseRedirect('/accounts/login')
