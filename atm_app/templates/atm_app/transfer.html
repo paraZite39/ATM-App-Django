@@ -5,7 +5,7 @@
     <div class="form-group">
     <form action="/atm/transfer" method="post">
         {% csrf_token %}
-        {{ form }}
+        {{ form.as_p }}
         <input class="btn btn-primary" type="submit" value="Transfer"/>
     </form>
     </div>

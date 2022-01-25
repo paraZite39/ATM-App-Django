@@ -3,5 +3,26 @@
 {% block content %}
 	<h1 class="section-title">Welcome to the bank app!</h1>
 	<h3> Use the menu items on the left side to navigate.</h3>
+	{% if latest_transactions_list %}
+		<h2 class="subsection">Latest transactions</h1>
+		<table id="transaction-log" class="table">
+			<tr>
+				<th>Timestamp</th>
+				<th>Type</th>
+				<th>Currency</th>
+				<th>Amount</th>
+				<th>Details</th>
+			</tr>
+			{% for transaction in latest_transactions_list %}
+				<tr>
+					<td>{{ transaction.timestamp }}</td>
+					<td>{{ transaction.transaction_type }}</td>
+					<td>{{ transaction.currency }}</td>
+					<td>{{ transaction.amount }}</td>
+					<td>{{ transaction.details }}</td>
+				</tr>
+			{% endfor %}
+		</table>
+	{% endif %}
 {% endblock %}
 		
