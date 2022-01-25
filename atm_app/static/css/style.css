@@ -5,6 +5,15 @@ body {
 
 #main-content {
 	margin-top: 100px;
+	background-color: rgba(80, 81, 104, 0.2);
+	padding: 20px;
+	border-radius: 1%;
+	width: 70%;
+}
+
+
+button {
+	background-color: #6320EE;
 }
 
 .balance-item {
@@ -14,7 +23,7 @@ body {
 }
 
 .section-title {
-	color: #6320EE;
+	color: #505168;
 	margin-bottom: 20px;
 }
 
@@ -27,6 +36,12 @@ body {
 	width: 200px;
 	padding-top: 100px;
 }
+
+.btn-primary {
+	background-color: #27233A;
+}
+
+
 
 .sidebar-nav > li > a {
 	color: #F8F0FB;

@@ -1,6 +1,6 @@
-<html>
-	<body>
-		<p>Logged out!</p>
-		<a href="{% url 'login'%}">Click here to login again.</a>
-	</body>
-</html>
+{% extends 'template_base.html' %}
+
+{% block content %}
+		<h1 class="section-title">Logged out!</p>
+		<a href="{% url 'login'%}"><button class="btn btn-primary">Click here to login again.</button></a>
+{% endblock %}

@@ -1,14 +1,9 @@
-<html>
-	<head>
-		<title>Login</title>
-	</head>
-	<body>
-		{% block content %}
-			{% if form.errors %}
-				<p>Username and pass didn't match, please try again.</p>
-			{% endif %}
+{% extends 'template_base.html' %}
 
-			<form method="post" action="{% url 'login' %}">
+{% block content %}
+		{% if not user.is_authenticated %}
+		<h1 class="section-title">Log in</h1>
+		<form method="post" action="{% url 'login' %}">
 				{% csrf_token %}
 				<table>
 					<tr>
@@ -20,10 +15,10 @@
 						<td>{{ form.password }}</td>
 					</tr>
 				</table>
-				<input type="submit" value="login" />
-			</form>						
-		{% endblock %}
-	</body>
-</html>
-	</body>
-</html>
+				<input class="btn btn-primary" type="submit" value="login" />
+			</form>
+			<a href="/atm/register"><button style="margin-top: 10px;" class="btn btn-primary">Create new account</button></a>
+		{% else %}
+		<h1 class="section-title">Already logged in</h1>
+		{% endif %}				
+{% endblock %}

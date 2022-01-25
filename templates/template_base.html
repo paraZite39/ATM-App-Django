@@ -13,20 +13,26 @@
 		{% block sidebar %}
 		<div class="row">
 			<div class="col-sm-2">
+				{% if user.is_authenticated %}
 				<ul class="sidebar-nav">
 					<li><a href="{% url 'index' %}">Home</a></li>
 					<li><a href="{% url 'query' %}">Query</a></li>
 					<li><a href="{% url 'deposit' %}">Deposit</a></li>
 					<li><a href="{% url 'withdraw' %}">Withdraw</a></li>
-					<li><a href="{% url '/accounts/logout' %}>Logout</a></li>
+					<li><a href="{% url 'exchange' %}">Exchange</a></li>
+					<li><a href="{% url 'transfer' %}">Transfer</a></li>
+					<li><a href="/accounts/logout">Logout</a></li>
 				</ul>
+				{% endif %}
 			</div>
 		</div>
 		{% endblock %}
 	</div>
-	<div id="main-content" class="col-sm-10">
-		{% block content %}
-		{% endblock %}
+	<div class="col-sm-10">
+		<div id="main-content">
+			{% block content %}
+			{% endblock %}
+		</div>
 	</div>
 
 	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

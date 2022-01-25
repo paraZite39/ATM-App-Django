@@ -4,7 +4,7 @@
     <h1 class="section-title">Enter here the amount you want to withdraw.</h1>
     <form action="/atm/withdraw" method="post">
         {% csrf_token %}
-        {{ form }}
-        <input class="btn btn-primary" type="submit" value="Deposit"/>
+        {{ form.as_p }}
+        <input class="btn btn-primary" type="submit" value="Withdraw"/>
     </form>
 {% endblock %}
