@@ -6,6 +6,8 @@ class Balance(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     balance_currency = models.CharField(max_length = 3)
     balance_amount = models.DecimalField(max_digits = 10, decimal_places = 2, default = 0)
+    # last_read = models.DateTimeField()
+    # last_write = models.DateTimeField()
 
     def __str__(self):
         # human-friendly string representation of balance

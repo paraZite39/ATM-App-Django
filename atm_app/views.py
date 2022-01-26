@@ -48,27 +48,32 @@ def deposit(request):
         if request.method == 'POST':
             form = AmountForm(request.POST)
             if form.is_valid():
+                # get timestamp
+                current_timestamp = datetime.datetime.now()
+                
                 dep_amount = form.cleaned_data['amount']
                 dep_currency = form.cleaned_data['currency']
 
                 try:
+                    #read
                     user_balance = Balance.objects.get(user=request.user, balance_currency=dep_currency)
                 except Balance.DoesNotExist:
                     # create new account in receiving balance if it doesn't exist
+                    # write, commit
                     new_balance = Balance(user=request.user, balance_currency=dep_currency, balance_amount=dep_amount)
                     new_balance.save()
 
                     # log transaction
-                    transaction = Transaction(user=request.user, timestamp=datetime.datetime.now(), transaction_type="Deposit", currency=dep_currency, amount=dep_amount, details="")
+                    transaction = Transaction(user=request.user, timestamp=current_timestamp, transaction_type="Deposit", currency=dep_currency, amount=dep_amount, details="")
                     transaction.save()
                     return HttpResponseRedirect('/atm/')
 
-                # add funds, save
+                # write, commit
                 user_balance.balance_amount += dep_amount
                 user_balance.save()
 
                 # log transaction
-                transaction = Transaction(user=request.user, timestamp=datetime.datetime.now(), transaction_type="Deposit", currency=dep_currency, amount=dep_amount, details="")
+                transaction = Transaction(user=request.user, timestamp=current_timestamp, transaction_type="Deposit", currency=dep_currency, amount=dep_amount, details="")
                 transaction.save()
                 
                 return HttpResponseRedirect('/atm/')
@@ -89,6 +94,7 @@ def register(request):
         if request.method == 'POST':
             form = NewUserForm(request.POST)
             if form.is_valid():
+                
                 newuser_username = form.cleaned_data['username']
                 newuser_email = form.cleaned_data['email']
                 newuser_pass = form.cleaned_data['password1']
@@ -117,10 +123,14 @@ def withdraw(request):
         if request.method == 'POST':
             form = AmountForm(request.POST)
             if form.is_valid():
+                # get timestamp
+                current_timestamp = datetime.datetime.now()
+                
                 withdraw_amount = form.cleaned_data['amount']
                 withdraw_currency = form.cleaned_data['currency']
 
                 try:
+                    # read
                     user_balance = Balance.objects.get(user=request.user, balance_currency=withdraw_currency)
                 except Balance.DoesNotExist:
                     # user doesn't have account in selected currency
@@ -130,12 +140,12 @@ def withdraw(request):
                     # not enough funds to withdraw
                     return HttpResponseRedirect('/atm/')
 
-                # subtract from account, commit
+                # write, commit
                 user_balance.balance_amount -= withdraw_amount
                 user_balance.save()
 
                 # create transaction in log
-                transaction = Transaction(user=request.user, timestamp=datetime.datetime.now(), transaction_type="Withdraw", currency=withdraw_currency, amount=withdraw_amount, details="")
+                transaction = Transaction(user=request.user, timestamp=current_timestamp, transaction_type="Withdraw", currency=withdraw_currency, amount=withdraw_amount, details="")
                 transaction.save()
                 
                 return HttpResponseRedirect('/atm/')
@@ -180,6 +190,9 @@ def exchange(request):
         if request.method == 'POST':
             form = ExchangeForm(request.POST)
             if form.is_valid():
+                # get timestamp
+                current_timestamp = datetime.datetime.now()
+                
                 from_currency = form.cleaned_data['from_currency']
                 exchange_amount = form.cleaned_data['amount']
                 to_currency = form.cleaned_data['to_currency']
@@ -189,24 +202,28 @@ def exchange(request):
                     return HttpResponseRedirect('/atm/')
 
                 try:
+                    # read
                     from_balance = Balance.objects.get(user=request.user, balance_currency=from_currency)
                 except Balance.DoesNotExist:
                     # user doesn't have an account in the sending currency
                     return HttpResponseRedirect('/atm/')
 
                 try:
+                    # read
                     to_balance = Balance.objects.get(user=request.user, balance_currency=to_currency)
                 except Balance.DoesNotExist:
                     # user doesn't have an account in the receiving currency
+                    # write
                     to_balance = Balance(user=request.user, balance_currency=to_currency, balance_amount=0)
 
+                # read?
                 if(exchange_amount > from_balance.balance_amount):
                     # not enough funds in sending currency
                     return HttpResponseRedirect('/atm/')
 
                 final_amount = decimal.Decimal(currency_exchange_rates[from_currency][to_currency]) * exchange_amount
 
-                # add to receiving balance, subtract from sending balance, save
+                # write, write, commit, commit
                 from_balance.balance_amount -= exchange_amount
                 to_balance.balance_amount += final_amount
                 from_balance.save()
@@ -232,39 +249,47 @@ def transfer(request):
     if request.user.is_authenticated:
         template = loader.get_template('atm_app/transfer.html')
         if request.method == 'POST':
+            # get timestamp
+            current_timestamp = datetime.datetime.now()
+            
             form = TransferForm(request.POST)
             if form.is_valid():
                 transfer_currency = form.cleaned_data['currency']
                 transfer_amount = form.cleaned_data['amount']
                 to_username = form.cleaned_data['recipient_user']
 
-
                 if request.user.username == to_username or transfer_amount <= 0:
                     # cannot transfer to sending account or an amount of maximum 0
                     return HttpResponseRedirect('/atm/')
 
                 try:
+                    # read
                     from_balance = Balance.objects.get(user=request.user, balance_currency=transfer_currency)
                 except Balance.DoesNotExist:
                     # sending account does not exist
                     return HttpResponseRedirect('/atm/')
 
+                # read?
                 if transfer_amount > from_balance.balance_amount:
                     # not enough money in sending account
                     return HttpResponseRedirect('/atm/')
 
                 try:
+                    # read
                     to_user = User.objects.get(username=to_username)
                 except User.DoesNotExist:
                     # recipient user not found
                     return HttpResponseRedirect('/atm/')
                 
                 try:
+                    # read
                     to_balance = Balance.objects.get(user=to_user, balance_currency=transfer_currency)
                 except Balance.DoesNotExist:
                     # recipient user doesn't have an account in the chosen currency
+                    # write
                     to_balance = Balance(user=to_user, balance_currency=transfer_currency, amount=0)
 
+                # write, write, commmit, commit
                 from_balance.balance_amount -= transfer_amount
                 to_balance.balance_amount += transfer_amount
                 from_balance.save()
